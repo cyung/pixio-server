@@ -10,10 +10,14 @@ import (
   "time"
   "math/rand"
   "strings"
+  "encoding/json"
   "github.com/gorilla/mux"
   "github.com/patrickmn/go-cache"
 )
 
+type Image struct {
+  Url string `json:"url"`
+}
 var c *cache.Cache
 
 func init() {
@@ -36,8 +40,9 @@ func AddImage(w http.ResponseWriter, r *http.Request) {
 
   filename := header.Filename
   extension := filename[strings.LastIndex(filename, "."):]
+  image_filename := RandomFilename() + extension
 
-  out, err := os.Create("./images/" + RandomFilename() + extension)
+  out, err := os.Create("./images/" + image_filename)
   if err != nil {
     w.WriteHeader(500)
     fmt.Println(err)
@@ -52,6 +57,12 @@ func AddImage(w http.ResponseWriter, r *http.Request) {
   }
 
   w.WriteHeader(201)
+
+  image := &Image{"http://ng-chris.com/img/" + image_filename}
+  err = json.NewEncoder(w).Encode(image)
+  if err != nil {
+    panic(err)
+  }
 }
 
 func RandomFilename() string {
