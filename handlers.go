@@ -5,7 +5,7 @@ import (
   "fmt"
   "bytes"
   "os"
-  "io"
+  // "io"
   "io/ioutil"
   "time"
   "math/rand"
@@ -103,27 +103,37 @@ func AddImage(w http.ResponseWriter, r *http.Request) {
   }
   defer file.Close()
 
+  // read image into buffer
+  buf, err := ioutil.ReadAll(file)
+  if err != nil {
+    fmt.Println(err)
+  }
+
   filename := header.Filename
   extension := filename[strings.LastIndex(filename, "."):]
   image_filename := RandomFilename() + extension
 
-  out, err := os.Create("./images/" + image_filename)
-  if err != nil {
-    w.WriteHeader(500)
-    fmt.Println(err)
-    return
-  }
+  go func() {
+    out, err := os.Create("./images/" + image_filename)
+    if err != nil {
+      fmt.Println(err)
+      return
+    }
+    defer out.Close()
 
-  // verify file data
-  _, err = io.Copy(out, file)
-  if err != nil {
-    w.WriteHeader(500)
-    fmt.Println(err)
-  }
+    _, err = out.Write(buf)
+    if err != nil {
+      w.WriteHeader(500)
+      fmt.Println(err)
+      return
+    }
+  }()
+
+  // save buffer to cache
+  c.Set(image_filename, buf, cache.DefaultExpiration)
 
   w.WriteHeader(201)
-
-  image := &Image{"http://ng-chris.com/img/" + image_filename}
+  image := &Image{BaseUrl() + "/img/" + image_filename}
   err = json.NewEncoder(w).Encode(image)
   if err != nil {
     panic(err)
@@ -131,7 +141,7 @@ func AddImage(w http.ResponseWriter, r *http.Request) {
 }
 
 func RandomFilename() string {
-  const CHAR_LENGTH = 10
+  const CHAR_LENGTH = 6
   const chars = "abcdefghijklmnopqrstuvwxyz" +
                 "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
                 "0123456789"
@@ -153,10 +163,12 @@ func GetImage(w http.ResponseWriter, r *http.Request) {
 
   data, found := c.Get(filename)
   if found {
+    fmt.Println("found in cache")
     http.ServeContent(w, r, filename, time.Time{}, bytes.NewReader(data.([]byte)))
     return
   }
 
+  fmt.Println("not found in cache")
   buf, err := ioutil.ReadFile(filepath)
   if err != nil {
     fmt.Println("file not found")

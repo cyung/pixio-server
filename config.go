@@ -7,10 +7,11 @@ import (
 )
 
 type Configuration struct {
-  ChrisKey string `json:"CHRIS_KEY"`
+  Key string `json:"key"`
 }
 
-var key string
+var _key string
+const _url string = "http://localhost:3001"
 
 func init() {
   file, err := ioutil.ReadFile("./config.json")
@@ -24,13 +25,17 @@ func init() {
     log.Fatal(err)
   }
 
-  key = config.ChrisKey
+  _key = config.Key
 }
 
 func GetKey() string {
-  return key
+  return _key
+}
+
+func BaseUrl() string {
+  return _url
 }
 
 func Validate(client_key string) bool {
-  return client_key == key
+  return client_key == _key
 }

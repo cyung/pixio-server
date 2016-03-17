@@ -28,7 +28,7 @@ gulp.task('server:spawn', function() {
     server.kill();
   }
 
-  server = child.spawn('./bin/pixio-server');
+  server = child.spawn('pixio-server');
 
   server.stdout.on('data', function(data) {
     var lines = data.toString().split('\n');
