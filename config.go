@@ -8,10 +8,11 @@ import (
 
 type Configuration struct {
   Key string `json:"key"`
+  Url string `json:"url"`
 }
 
 var _key string
-const _url string = "http://localhost:3001"
+var _url string
 
 func init() {
   file, err := ioutil.ReadFile("./config.json")
@@ -26,6 +27,7 @@ func init() {
   }
 
   _key = config.Key
+  _url = config.Url
 }
 
 func GetKey() string {
