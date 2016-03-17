@@ -5,7 +5,6 @@ import (
   "fmt"
   "bytes"
   "os"
-  // "io"
   "io/ioutil"
   "time"
   "math/rand"
@@ -123,7 +122,6 @@ func AddImage(w http.ResponseWriter, r *http.Request) {
 
     _, err = out.Write(buf)
     if err != nil {
-      w.WriteHeader(500)
       fmt.Println(err)
       return
     }
@@ -163,12 +161,12 @@ func GetImage(w http.ResponseWriter, r *http.Request) {
 
   data, found := c.Get(filename)
   if found {
-    fmt.Println("found in cache")
+    // fmt.Println("found in cache")
     http.ServeContent(w, r, filename, time.Time{}, bytes.NewReader(data.([]byte)))
     return
   }
 
-  fmt.Println("not found in cache")
+  // fmt.Println("not found in cache")
   buf, err := ioutil.ReadFile(filepath)
   if err != nil {
     fmt.Println("file not found")
