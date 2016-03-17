@@ -24,13 +24,15 @@ var c *cache.Cache
 func init() {
   c = cache.New(5*time.Minute, 30*time.Second)
 
-  for {
-    err := cleanOld()
-    if err != nil {
-      fmt.Println(err)
+  go func() {
+    for {
+      err := cleanOld()
+      if err != nil {
+        fmt.Println(err)
+      }
+      time.Sleep(5 * time.Second)
     }
-    time.Sleep(5 * time.Second)
-  }
+  }()
 }
 
 // remove images older than a set time
