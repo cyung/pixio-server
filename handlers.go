@@ -18,6 +18,7 @@ import (
 type Image struct {
   Url string `json:"url"`
 }
+
 var c *cache.Cache
 
 func init() {
